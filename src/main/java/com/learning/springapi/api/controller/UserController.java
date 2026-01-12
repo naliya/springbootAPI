@@ -2,10 +2,16 @@ package com.learning.springapi.api.controller;
 
 import com.learning.springapi.api.model.User;
 import com.learning.springapi.dto.CreateUserRequest;
+import com.learning.springapi.dto.PagedResponse;
 import com.learning.springapi.dto.UpdateUserRequest;
+import com.learning.springapi.dto.UserResponse;
 import com.learning.springapi.response.ApiResponse;
 import com.learning.springapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -82,18 +88,85 @@ public class UserController {
     }
 
     //Get All user
+//    @GetMapping("/users")
+//    public ApiResponse<Page<UserResponse>> listUsers(
+//            @PageableDefault(size = 3) Pageable pageable
+//    ) {
+//        Page<User> page = userService.getAllUsers(pageable);
+//
+//        Page<UserResponse> data = page.map(u ->
+//                new UserResponse(u.getId(), u.getAge(), u.getName(), u.getEmail())
+//        );
+//
+//        return new ApiResponse<>(200, "Users retrieved successfully", data);
+//    }
+
+//    @GetMapping("/users")
+//    public ApiResponse<PagedResponse<UserResponse>> listUsers(
+//            @PageableDefault(size = 3) Pageable pageable
+//    ) {
+//        Page<User> page = userService.getAllUsers(pageable);
+//
+//        List<UserResponse> users = page.getContent().stream()
+//                .map(u -> new UserResponse(
+//                        u.getId(),
+//                        u.getAge(),
+//                        u.getName(),
+//                        u.getEmail()
+//                ))
+//                .toList();
+//
+//        PagedResponse<UserResponse> response =
+//                new PagedResponse<>(
+//                        users,
+//                        page.getNumber(),
+//                        page.getSize(),
+//                        page.getTotalElements(),
+//                        page.getTotalPages(),
+//                        page.isFirst(),
+//                        page.isLast()
+//                );
+//
+//        return new ApiResponse<>(200, "Users retrieved successfully", response);
+//    }
+
+
     @GetMapping("/users")
-    public ResponseEntity<ApiResponse<List<User>>> listUsers() {
-        return ResponseEntity.ok(
-                new ApiResponse<>(
-                        HttpStatus.OK.value(),
-                        "Users retrieved successfully",
-                        userService.getAllUsers()
-                )
-        );
+    public ApiResponse<PagedResponse<UserResponse>> listUsers(
+            @PageableDefault( // for default sorting
+                    size = 3,
+                    sort = "id", // KEY for sort
+                    direction = Sort.Direction.DESC
+            ) Pageable pageable
+    ) {
+        Page<User> page = userService.getAllUsers(pageable);
+
+        List<UserResponse> users = page.getContent().stream()
+                .map(u -> new UserResponse(
+                        u.getId(),
+                        u.getAge(),
+                        u.getName(),
+                        u.getEmail()
+                ))
+                .toList();
+
+        PagedResponse<UserResponse> response =
+                new PagedResponse<>(
+                        users,
+                        page.getNumber(),
+                        page.getSize(),
+                        page.getTotalElements(),
+                        page.getTotalPages(),
+                        page.isFirst(),
+                        page.isLast()
+                );
+
+        return new ApiResponse<>(200, "Users retrieved successfully", response);
     }
 
-   //Delete User
+
+
+    //Delete User
    @DeleteMapping("/users/{id}")
    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Integer id) {
        userService.deleteUser(id);

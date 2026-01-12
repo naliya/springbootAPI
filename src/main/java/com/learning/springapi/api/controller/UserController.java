@@ -2,6 +2,7 @@ package com.learning.springapi.api.controller;
 
 import com.learning.springapi.api.model.User;
 import com.learning.springapi.dto.CreateUserRequest;
+import com.learning.springapi.dto.UpdateUserRequest;
 import com.learning.springapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.util.Optional;
 public class UserController {
 
     private UserService userService;
+    public record DeleteResponse(String message) {}
 
     @Autowired
     public UserController(UserService userService){
@@ -31,7 +33,14 @@ public class UserController {
         );
     }
 
-    // get user by ID
+    //Update User
+    @PutMapping("/users/{id}")
+    public User updateUser(@PathVariable Integer id,
+                           @RequestBody UpdateUserRequest req) {
+        return userService.updateUser(id, req.getAge(), req.getName(), req.getEmail());
+    }
+
+    //Get user by ID
     @GetMapping("/user")
     public User getUser(@RequestParam Integer id) {
         return userService.getUser(id)
@@ -41,10 +50,17 @@ public class UserController {
                 ));
     }
 
-    // Get All user
+    //Get All user
     @GetMapping("/users")
     public java.util.List<User> listUsers() {
         return userService.getAllUsers();
+    }
+
+   //Delete User
+    @DeleteMapping("/users/{id}")
+    public DeleteResponse deleteUser(@PathVariable Integer id) {
+        userService.deleteUser(id);
+        return new DeleteResponse("User deleted successfully");
     }
 
 }

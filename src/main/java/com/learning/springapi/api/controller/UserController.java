@@ -7,6 +7,7 @@ import com.learning.springapi.dto.UpdateUserRequest;
 import com.learning.springapi.dto.UserResponse;
 import com.learning.springapi.response.ApiResponse;
 import com.learning.springapi.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,11 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
 import jakarta.validation.Valid;
-
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -33,7 +31,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    //Create User
+    @Operation(summary = "Create a new user")
     @PostMapping("/users")
     public ResponseEntity<ApiResponse<User>> createUser(
             @Valid @RequestBody CreateUserRequest req
@@ -48,7 +46,7 @@ public class UserController {
                 ));
     }
 
-    //Update User
+    @Operation(summary = "Update a user")
     @PutMapping("/users/{id}")
     public ResponseEntity<ApiResponse<User>> updateUser(
             @PathVariable Integer id,
@@ -70,7 +68,7 @@ public class UserController {
         );
     }
 
-    //Get user by ID
+    @Operation(summary = "Get user by ID")
     @GetMapping("/users/{id}")
     public ResponseEntity<ApiResponse<User>> getUser(@PathVariable Integer id) {
         User user = userService.getUser(id)
@@ -88,6 +86,7 @@ public class UserController {
     }
 
     //Get All user
+    @Operation(summary = "Get all user / Filter user")
     @GetMapping("/users")
     public ApiResponse<PagedResponse<UserResponse>> listUsers(
             @RequestParam(required = false) Integer minAge,
@@ -120,7 +119,7 @@ public class UserController {
         return new ApiResponse<>(200, "Users retrieved successfully", response);
     }
 
-    //Delete User
+    //Delete User@Operation(summary = "Delete user by ID")
    @DeleteMapping("/users/{id}")
    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Integer id) {
        userService.deleteUser(id);

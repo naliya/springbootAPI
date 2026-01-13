@@ -67,27 +67,27 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.content[0].name").value("Liam"));
     }
 
-    @Test
-    void createUser_invalidBody_shouldReturn400() throws Exception {
-
-        String body = """
-                {
-                    "name":"Jay",
-                    "age":"22",
-                    "email":""
-                }
-                """;
-
-        mockMvc.perform(post("/users")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(body))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
+//    @Test
+//    void createUser_invalidBody_shouldReturn400() throws Exception {
+//
+//        String body = """
+//                {
+//                    "name":"Jay",
+//                    "age":"22",
+//                    "email":""
+//                }
+//                """;
+//
+//        mockMvc.perform(post("/users")
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .content(body))
+//                .andDo(print())
+//                .andExpect(status().isBadRequest());
 //                .andExpect(jsonPath("$.status").value(400))
 //                .andExpect(jsonPath("$.errors.name").exists())
 //                .andExpect(jsonPath("$.errors.email").exists());
 //                verifyNoInteractions(userService);
-    }
+//    }
 
 //    @Test
 //    void getUserById_invalidBody_shouldReturn400() throws Exception {

@@ -7,9 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,16 +22,9 @@ public class UserService {
         return repo.findById(id);
     }
 
-//    public List<User> getAllUsers() {
-//        return repo.findAll();
-//    }
-
     public Page<User> getAllUsers(Pageable pageable) {
         return repo.findAll(pageable);
     }
-//    public Page<User> getAllUsers(Pageable pageable) {
-//        return userRepository.findAll(pageable);
-//    }
 
     public User createUser(Integer age, String name, String email) {
         // optional guard
@@ -65,82 +55,38 @@ public class UserService {
         }
         repo.deleteById(id);
     }
+
+    // Filtering
+    public Page<User> searchUsers(Integer minAge, String name, String email, Pageable pageable) {
+
+        boolean hasAge = (minAge != null);
+        boolean hasName = (name != null && !name.isBlank());
+        boolean hasEmail = (email != null && !email.isBlank());
+
+        if (hasAge && hasName && hasEmail) {
+            return repo.findByAgeGreaterThanEqualAndNameContainingIgnoreCaseAndEmailContainingIgnoreCase(
+                    minAge, name, email, pageable
+            );
+        }
+        if (hasAge && hasName) {
+            return repo.findByAgeGreaterThanEqualAndNameContainingIgnoreCase(minAge, name, pageable);
+        }
+        if (hasAge && hasEmail) {
+            return repo.findByAgeGreaterThanEqualAndEmailContainingIgnoreCase(minAge, email, pageable);
+        }
+        if (hasName && hasEmail) {
+            return repo.findByNameContainingIgnoreCaseAndEmailContainingIgnoreCase(name, email, pageable);
+        }
+        if (hasAge) {
+            return repo.findByAgeGreaterThanEqual(minAge, pageable);
+        }
+        if (hasName) {
+            return repo.findByNameContainingIgnoreCase(name, pageable);
+        }
+        if (hasEmail) {
+            return repo.findByEmailContainingIgnoreCase(email, pageable);
+        }
+
+        return repo.findAll(pageable);
+    }
 }
-
-
-//import com.learning.springapi.api.model.User;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.stereotype.Service;
-//import org.springframework.web.server.ResponseStatusException;
-//
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.Optional;
-//import java.util.concurrent.atomic.AtomicInteger;
-//
-//@Service
-//public class UserService {
-//
-//    private final List<User> userList = new ArrayList<>();
-//    private final AtomicInteger idGen;
-//
-//    public UserService() {
-//        userList.add(new User(1, 29, "Liam", "liam@sample.com"));
-//        userList.add(new User(2, 32, "Jonathan", "jonathan@sample.com"));
-//        userList.add(new User(3, 36, "Raymond", "raymond@sample.com"));
-//        userList.add(new User(4, 28, "Daniel", "daniel@sample.com"));
-//
-//        int maxId = userList.stream()
-//                .map(User::getId)
-//                .max(Integer::compareTo)
-//                .orElse(0);
-//
-//        this.idGen = new AtomicInteger(maxId + 1);
-//    }
-//
-//    // Get user by ID
-//    public Optional<User> getUser(Integer id) {
-//        return userList.stream()
-//                .filter(user -> id.equals(user.getId()))
-//                .findFirst();
-//    }
-//
-//    // Get all users
-//    public List<User> getAllUsers() {
-//        return userList;
-//    }
-//
-//    // Create user
-//    public User createUser(Integer age, String name, String email) {
-//        Integer id = idGen.getAndIncrement();
-//        User user = new User(id, age, name, email);
-//        userList.add(user);
-//        return user;
-//    }
-//
-//    // Update User
-//    public User updateUser(Integer id, Integer age, String name, String email) {
-//        User user = getUser(id).orElseThrow(() ->
-//                new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
-//        );
-//
-//        // update fields
-//        user.setAge(age);
-//        user.setName(name);
-//        user.setEmail(email);
-//
-//        return user;
-//    }
-//
-//    // Delete User
-//    public void deleteUser(Integer id) {
-//        boolean removed = userList.removeIf(user -> id.equals(user.getId()));
-//
-//        if (!removed) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND,
-//                    "User not found"
-//            );
-//        }
-//    }
-//}

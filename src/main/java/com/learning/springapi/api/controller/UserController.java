@@ -90,13 +90,12 @@ public class UserController {
     //Get All user
     @GetMapping("/users")
     public ApiResponse<PagedResponse<UserResponse>> listUsers(
-            @PageableDefault( // for default sorting
-                    size = 3,
-                    sort = "id", // KEY for sort
-                    direction = Sort.Direction.DESC
-            ) Pageable pageable
-    ) {
-        Page<User> page = userService.getAllUsers(pageable);
+            @RequestParam(required = false) Integer minAge,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String email,
+            @PageableDefault(size = 3, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    )  {
+        Page<User> page = userService.searchUsers(minAge, name, email, pageable);
 
         List<UserResponse> users = page.getContent().stream()
                 .map(u -> new UserResponse(

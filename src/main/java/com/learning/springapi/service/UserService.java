@@ -46,6 +46,9 @@ public class UserService {
     }
 
     public User updateUser(Integer id, Integer age, String name, String email) {
+        if (repo.existsByEmail(email)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
+        }
         User user = repo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 

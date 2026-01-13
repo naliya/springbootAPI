@@ -88,49 +88,6 @@ public class UserController {
     }
 
     //Get All user
-//    @GetMapping("/users")
-//    public ApiResponse<Page<UserResponse>> listUsers(
-//            @PageableDefault(size = 3) Pageable pageable
-//    ) {
-//        Page<User> page = userService.getAllUsers(pageable);
-//
-//        Page<UserResponse> data = page.map(u ->
-//                new UserResponse(u.getId(), u.getAge(), u.getName(), u.getEmail())
-//        );
-//
-//        return new ApiResponse<>(200, "Users retrieved successfully", data);
-//    }
-
-//    @GetMapping("/users")
-//    public ApiResponse<PagedResponse<UserResponse>> listUsers(
-//            @PageableDefault(size = 3) Pageable pageable
-//    ) {
-//        Page<User> page = userService.getAllUsers(pageable);
-//
-//        List<UserResponse> users = page.getContent().stream()
-//                .map(u -> new UserResponse(
-//                        u.getId(),
-//                        u.getAge(),
-//                        u.getName(),
-//                        u.getEmail()
-//                ))
-//                .toList();
-//
-//        PagedResponse<UserResponse> response =
-//                new PagedResponse<>(
-//                        users,
-//                        page.getNumber(),
-//                        page.getSize(),
-//                        page.getTotalElements(),
-//                        page.getTotalPages(),
-//                        page.isFirst(),
-//                        page.isLast()
-//                );
-//
-//        return new ApiResponse<>(200, "Users retrieved successfully", response);
-//    }
-
-
     @GetMapping("/users")
     public ApiResponse<PagedResponse<UserResponse>> listUsers(
             @PageableDefault( // for default sorting
@@ -164,13 +121,10 @@ public class UserController {
         return new ApiResponse<>(200, "Users retrieved successfully", response);
     }
 
-
-
     //Delete User
    @DeleteMapping("/users/{id}")
    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Integer id) {
        userService.deleteUser(id);
-
        return ResponseEntity.ok(
                new ApiResponse<>(
                        HttpStatus.OK.value(),

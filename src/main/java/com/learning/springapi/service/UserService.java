@@ -1,9 +1,11 @@
 package com.learning.springapi.service;
 
 import com.learning.springapi.api.model.User;
+import com.learning.springapi.api.spec.UserSpecifications;
 import com.learning.springapi.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -59,34 +61,18 @@ public class UserService {
     // Filtering
     public Page<User> searchUsers(Integer minAge, String name, String email, Pageable pageable) {
 
-        boolean hasAge = (minAge != null);
-        boolean hasName = (name != null && !name.isBlank());
-        boolean hasEmail = (email != null && !email.isBlank());
+        Specification<User> spec = Specification.where(null);
 
-        if (hasAge && hasName && hasEmail) {
-            return repo.findByAgeGreaterThanEqualAndNameContainingIgnoreCaseAndEmailContainingIgnoreCase(
-                    minAge, name, email, pageable
-            );
+        if (minAge != null) {
+            spec = spec.and(UserSpecifications.ageGte(minAge));
         }
-        if (hasAge && hasName) {
-            return repo.findByAgeGreaterThanEqualAndNameContainingIgnoreCase(minAge, name, pageable);
+        if (name != null && !name.isBlank()) {
+            spec = spec.and(UserSpecifications.nameContainsIgnoreCase(name.trim()));
         }
-        if (hasAge && hasEmail) {
-            return repo.findByAgeGreaterThanEqualAndEmailContainingIgnoreCase(minAge, email, pageable);
-        }
-        if (hasName && hasEmail) {
-            return repo.findByNameContainingIgnoreCaseAndEmailContainingIgnoreCase(name, email, pageable);
-        }
-        if (hasAge) {
-            return repo.findByAgeGreaterThanEqual(minAge, pageable);
-        }
-        if (hasName) {
-            return repo.findByNameContainingIgnoreCase(name, pageable);
-        }
-        if (hasEmail) {
-            return repo.findByEmailContainingIgnoreCase(email, pageable);
+        if (email != null && !email.isBlank()) {
+            spec = spec.and(UserSpecifications.emailContainsIgnoreCase(email.trim()));
         }
 
-        return repo.findAll(pageable);
+        return repo.findAll(spec, pageable);
     }
 }

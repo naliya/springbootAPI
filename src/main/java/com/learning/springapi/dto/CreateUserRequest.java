@@ -12,11 +12,11 @@ public class CreateUserRequest {
     @NotNull(message = "Age is required")
     private Integer age;
 
-    @Schema(example = "James")
+    @Schema(example = "James", description = "Must be a not empty")
     @NotBlank(message = "Name is required")
     private String name;
 
-    @Schema(example = "james@sample.com")
+    @Schema(example = "james@sample.com", description = "Must be a valid email")
     @Email(message = "Email format is invalid")
     @Pattern(
             regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",

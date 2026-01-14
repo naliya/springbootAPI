@@ -1,14 +1,24 @@
 package com.learning.springapi.dto;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
 public class PagedResponse<T> {
 
     private List<T> content;
+
+    @Schema(example = "1")
     private int page;
+
+    @Schema(example = "1")
     private int size;
+    @Schema(example = "1")
     private long totalElements;
+    @Schema(example = "1")
     private int totalPages;
+    @Schema(example = "true")
     private boolean first;
+    @Schema(example = "false")
     private boolean last;
 
     public PagedResponse(

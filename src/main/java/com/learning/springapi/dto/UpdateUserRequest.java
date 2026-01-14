@@ -1,17 +1,21 @@
 package com.learning.springapi.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public class UpdateUserRequest {
+    @Schema(example = "20")
     @NotNull(message = "Age is required")
     private Integer age;
 
+    @Schema(example = "James")
     @NotBlank(message = "Name is required")
     private String name;
 
+    @Schema(hidden = true)
     @Email(message = "Email format is invalid")
     @Pattern(
             regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",

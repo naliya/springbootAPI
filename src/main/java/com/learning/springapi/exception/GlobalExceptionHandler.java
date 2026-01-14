@@ -29,37 +29,37 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Object> handleBadJson(HttpMessageNotReadableException ex) {
         // Keep message simple and safe for clients
-        Map<String, Object> details = Map.of(
+        Map<String, Object> error = Map.of(
                 "error", "Invalid request body. Check JSON format and field types (e.g., age must be a number)."
         );
 
-        return buildError(HttpStatus.BAD_REQUEST, "Malformed JSON or wrong field type", details);
+        return buildError(HttpStatus.BAD_REQUEST, "Malformed JSON or wrong field type", error);
     }
 
     // 3) Your thrown ResponseStatusException (e.g., NOT_FOUND from service/controller)
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Object> handleResponseStatus(ResponseStatusException ex) {
         HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
-        Map<String, Object> details = Map.of("error", ex.getReason() == null ? "Request failed" : ex.getReason());
-        return buildError(status, "Request failed", details);
+        Map<String, Object> error = Map.of("error", ex.getReason() == null ? "Request failed" : ex.getReason());
+        return buildError(status, "Request failed", error);
     }
 
     // 4) Catch-all fallback (don’t leak internals)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneric(Exception ex) {
-        Map<String, Object> details = Map.of(
+        Map<String, Object> error = Map.of(
                 "error", "Unexpected server error"
         );
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "Server error", details);
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "Server error", error);
     }
 
     // Helper: consistent error shape
-    private ResponseEntity<Object> buildError(HttpStatus status, String message, Map<String, ?> details) {
+    private ResponseEntity<Object> buildError(HttpStatus status, String message, Map<String, ?> error) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", Instant.now().toString());
         body.put("status", status.value());
         body.put("message", message);
-        body.put("details", details);
+        body.put("error", error);
         return ResponseEntity.status(status).body(body);
     }
 }

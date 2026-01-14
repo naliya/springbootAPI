@@ -5,9 +5,14 @@ import com.learning.springapi.dto.CreateUserRequest;
 import com.learning.springapi.dto.PagedResponse;
 import com.learning.springapi.dto.UpdateUserRequest;
 import com.learning.springapi.dto.UserResponse;
-import com.learning.springapi.response.ApiResponse;
+import com.learning.springapi.response.ApiResult;
 import com.learning.springapi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
@@ -32,14 +38,18 @@ public class UserController {
     }
 
     @Operation(summary = "Create a new user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "User created successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation failed")
+    })
     @PostMapping("/users")
-    public ResponseEntity<ApiResponse<User>> createUser(
+    public ResponseEntity<ApiResult<User>> createUser(
             @Valid @RequestBody CreateUserRequest req
     ) {
         User user = userService.createUser(req.getAge(), req.getName(), req.getEmail());
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(
+                .body(new ApiResult<>(
                         HttpStatus.CREATED.value(),
                         "User created successfully",
                         user
@@ -47,8 +57,20 @@ public class UserController {
     }
 
     @Operation(summary = "Update a user")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "User created successfully",
+                    content = @Content(schema = @Schema(implementation = com.learning.springapi.response.CreateUserSuccessDoc.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Request failed (validation or duplicate email)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     @PutMapping("/users/{id}")
-    public ResponseEntity<ApiResponse<User>> updateUser(
+    public ResponseEntity<ApiResult<User>> updateUser(
             @PathVariable Integer id,
             @Valid @RequestBody UpdateUserRequest req
     ) {
@@ -60,7 +82,7 @@ public class UserController {
         );
 
         return ResponseEntity.ok(
-                new ApiResponse<>(
+                new ApiResult<>(
                         HttpStatus.OK.value(),
                         "User updated successfully",
                         updated
@@ -70,14 +92,14 @@ public class UserController {
 
     @Operation(summary = "Get user by ID")
     @GetMapping("/users/{id}")
-    public ResponseEntity<ApiResponse<User>> getUser(@PathVariable Integer id) {
+    public ResponseEntity<ApiResult<User>> getUser(@PathVariable Integer id) {
         User user = userService.getUser(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "User not found"
                 ));
 
         return ResponseEntity.ok(
-                new ApiResponse<>(
+                new ApiResult<>(
                         HttpStatus.OK.value(),
                         "User retrieved successfully",
                         user
@@ -86,11 +108,19 @@ public class UserController {
     }
 
     //Get All user
-    @Operation(summary = "Get all user / Filter user")
+    @Operation(
+            summary = "Get users",
+            description = "Retrieve users with pagination and optional filters"
+    )
     @GetMapping("/users")
-    public ApiResponse<PagedResponse<UserResponse>> listUsers(
+    public ApiResult<PagedResponse<UserResponse>> listUsers(
+            @Parameter(description = "Minimum age (inclusive)")
             @RequestParam(required = false) Integer minAge,
+
+            @Parameter(description = "Search by name (contains)")
             @RequestParam(required = false) String name,
+
+            @Parameter(description = "Search by email (contains)")
             @RequestParam(required = false) String email,
             @PageableDefault(size = 3, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     )  {
@@ -116,15 +146,16 @@ public class UserController {
                         page.isLast()
                 );
 
-        return new ApiResponse<>(200, "Users retrieved successfully", response);
+        return new ApiResult<>(200, "Users retrieved successfully", response);
     }
 
-    //Delete User@Operation(summary = "Delete user by ID")
-   @DeleteMapping("/users/{id}")
-   public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Integer id) {
+    // Delete User
+    @Operation(summary = "Delete user by ID")
+    @DeleteMapping("/users/{id}")
+   public ResponseEntity<ApiResult<Void>> deleteUser(@PathVariable Integer id) {
        userService.deleteUser(id);
        return ResponseEntity.ok(
-               new ApiResponse<>(
+               new ApiResult<>(
                        HttpStatus.OK.value(),
                        "User deleted successfully",
                        null

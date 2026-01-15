@@ -20,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -42,6 +43,7 @@ public class UserController {
             @ApiResponse(responseCode = "201", description = "User created successfully"),
             @ApiResponse(responseCode = "400", description = "Validation failed")
     })
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @PostMapping("/users")
     public ResponseEntity<ApiResult<User>> createUser(
             @Valid @RequestBody CreateUserRequest req
@@ -69,6 +71,7 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/users/{id}")
     public ResponseEntity<ApiResult<User>> updateUser(
             @PathVariable Integer id,
@@ -91,6 +94,7 @@ public class UserController {
     }
 
     @Operation(summary = "Get user by ID")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/users/{id}")
     public ResponseEntity<ApiResult<User>> getUser(@PathVariable Integer id) {
         User user = userService.getUser(id)
@@ -112,6 +116,7 @@ public class UserController {
             summary = "Get users",
             description = "Retrieve users with pagination and optional filters"
     )
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/users")
     public ApiResult<PagedResponse<UserResponse>> listUsers(
             @Parameter(description = "Minimum age (inclusive)")
@@ -151,6 +156,7 @@ public class UserController {
 
     // Delete User
     @Operation(summary = "Delete user by ID")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/users/{id}")
    public ResponseEntity<ApiResult<Void>> deleteUser(@PathVariable Integer id) {
        userService.deleteUser(id);

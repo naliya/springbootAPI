@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.AuthenticationException;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -51,6 +52,12 @@ public class GlobalExceptionHandler {
                 "error", "Unexpected server error"
         );
         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "Server error", error);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> handleAuth(AuthenticationException ex) {
+        Map<String, Object> error = Map.of("error", "Invalid username or password");
+        return buildError(HttpStatus.UNAUTHORIZED, "Unauthorized", error);
     }
 
     // Helper: consistent error shape

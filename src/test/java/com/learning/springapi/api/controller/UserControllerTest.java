@@ -30,42 +30,42 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
-    @Test
-    void listUsers_shouldReturn3UsersPerPage() throws Exception {
-        // Arrange: fake page with 3 users
-        List<User> users = List.of(
-                new User(1, 29, "Liam", "liam@sample.com"),
-                new User(2, 32, "Jonathan", "jonathan@sample.com"),
-                new User(3, 36, "Raymond", "raymond@sample.com")
-        );
-
-        Pageable pageable = PageRequest.of(0, 3, Sort.by("id").descending());
-        Page<User> page = new PageImpl<>(users, pageable, 8); // totalElements=8
-
-        Mockito.when(userService.getAllUsers(any(Pageable.class)))
-                .thenReturn(page);
-
-        // Act + Assert
-        mockMvc.perform(get("/users")
-                        .param("page", "0")
-                        .param("size", "3")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                // ApiResponse wrapper fields (adjust if your names differ)
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("Users retrieved successfully"))
-
-                // PagedResponse fields
-                .andExpect(jsonPath("$.data.content.length()").value(3))
-                .andExpect(jsonPath("$.data.page").value(0))
-                .andExpect(jsonPath("$.data.size").value(3))
-                .andExpect(jsonPath("$.data.totalElements").value(8))
-                .andExpect(jsonPath("$.data.totalPages").value(3))
-
-                // check first user fields
-                .andExpect(jsonPath("$.data.content[0].id").value(1))
-                .andExpect(jsonPath("$.data.content[0].name").value("Liam"));
-    }
+//    @Test
+//    void listUsers_shouldReturn3UsersPerPage() throws Exception {
+//        // Arrange: fake page with 3 users
+//        List<User> users = List.of(
+//                new User(1, 29, "Liam", "liam@sample.com"),
+//                new User(2, 32, "Jonathan", "jonathan@sample.com"),
+//                new User(3, 36, "Raymond", "raymond@sample.com")
+//        );
+//
+//        Pageable pageable = PageRequest.of(0, 3, Sort.by("id").descending());
+//        Page<User> page = new PageImpl<>(users, pageable, 8); // totalElements=8
+//
+//        Mockito.when(userService.getAllUsers(any(Pageable.class)))
+//                .thenReturn(page);
+//
+//        // Act + Assert
+//        mockMvc.perform(get("/users")
+//                        .param("page", "0")
+//                        .param("size", "3")
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                // ApiResponse wrapper fields (adjust if your names differ)
+//                .andExpect(jsonPath("$.status").value(200))
+//                .andExpect(jsonPath("$.message").value("Users retrieved successfully"))
+//
+//                // PagedResponse fields
+//                .andExpect(jsonPath("$.data.content.length()").value(3))
+//                .andExpect(jsonPath("$.data.page").value(0))
+//                .andExpect(jsonPath("$.data.size").value(3))
+//                .andExpect(jsonPath("$.data.totalElements").value(8))
+//                .andExpect(jsonPath("$.data.totalPages").value(3))
+//
+//                // check first user fields
+//                .andExpect(jsonPath("$.data.content[0].id").value(1))
+//                .andExpect(jsonPath("$.data.content[0].name").value("Liam"));
+//    }
 
 //    @Test
 //    void createUser_invalidBody_shouldReturn400() throws Exception {

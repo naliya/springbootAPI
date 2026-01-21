@@ -3,6 +3,8 @@ package com.learning.springapi.service;
 import com.learning.springapi.api.model.User;
 import com.learning.springapi.api.spec.UserSpecifications;
 import com.learning.springapi.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,6 +15,8 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository repo;
 
@@ -34,6 +38,9 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
         }
         User user = new User(null, age, name, email); // id = null so DB generates it
+
+        log.debug("User saved to DB: id={}", user.getId());
+
         return repo.save(user);
     }
 
@@ -42,7 +49,10 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
         }
         User user = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> {
+                    log.warn("User not found for update: id={}", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+                });
 
         user.setAge(age);
         user.setName(name);

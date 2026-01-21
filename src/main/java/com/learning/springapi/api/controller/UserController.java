@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,8 @@ import java.util.List;
 
 @RestController
 public class UserController {
+
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     private UserService userService;
     public record DeleteResponse(String message) {}
@@ -48,8 +52,11 @@ public class UserController {
     public ResponseEntity<ApiResult<User>> createUser(
             @Valid @RequestBody CreateUserRequest req
     ) {
+
+        log.info("Create user request: name={}, age={}, email={}", req.getName(), req.getAge(), req.getEmail());
         User user = userService.createUser(req.getAge(), req.getName(), req.getEmail());
 
+        log.info("User created successfully: id={}", user.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResult<>(
                         HttpStatus.CREATED.value(),
@@ -77,12 +84,16 @@ public class UserController {
             @PathVariable Integer id,
             @Valid @RequestBody UpdateUserRequest req
     ) {
+
+        log.info("Update user request: id={}, name={}, age={}, email={}", id, req.getName(), req.getAge(), req.getEmail());
         User updated = userService.updateUser(
                 id,
                 req.getAge(),
                 req.getName(),
                 req.getEmail()
         );
+
+        log.info("User updated successfully: id={}", updated.getId());
 
         return ResponseEntity.ok(
                 new ApiResult<>(
@@ -97,10 +108,12 @@ public class UserController {
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/users/{id}")
     public ResponseEntity<ApiResult<User>> getUser(@PathVariable Integer id) {
+        log.info("Get user by id: id={}", id);
         User user = userService.getUser(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "User not found"
                 ));
+        log.info("Get user by ID updated successfully: id={}", user.getId());
 
         return ResponseEntity.ok(
                 new ApiResult<>(
@@ -129,6 +142,10 @@ public class UserController {
             @RequestParam(required = false) String email,
             @PageableDefault(size = 3, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     )  {
+
+        log.info("List users: minAge={}, name={}, email={}, page={}, size={}, sort={}",
+                minAge, name, email, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+
         Page<User> page = userService.searchUsers(minAge, name, email, pageable);
 
         List<UserResponse> users = page.getContent().stream()
@@ -151,6 +168,9 @@ public class UserController {
                         page.isLast()
                 );
 
+        log.info("Users retrieved: returned={}, total={}, totalPages={}, page={}",
+                users.size(), page.getTotalElements(), page.getTotalPages(), page.getNumber());
+
         return new ApiResult<>(200, "Users retrieved successfully", response);
     }
 
@@ -160,7 +180,11 @@ public class UserController {
     @DeleteMapping("/users/{id}")
    public ResponseEntity<ApiResult<Void>> deleteUser(@PathVariable Integer id) {
        userService.deleteUser(id);
-       return ResponseEntity.ok(
+
+        log.info("Delete user request: id={}", id);
+        log.info("User deleted successfully: id={}", id);
+
+        return ResponseEntity.ok(
                new ApiResult<>(
                        HttpStatus.OK.value(),
                        "User deleted successfully",

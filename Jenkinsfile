@@ -17,21 +17,21 @@ pipeline {
       }
 
     stage('Test') {
-        steps {
-          sh '''
-            docker run --rm \
-              -v "$PWD":/workspace \
-              -w /workspace \
-              maven:3.9.6-eclipse-temurin-17 \
-              mvn -B test
-          '''
-        }
-        post {
-          always {
-            junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
-          }
+      steps {
+        sh '''
+          docker run --rm \
+            -v "$WORKSPACE":/workspace \
+            -w /workspace \
+            maven:3.9.6-eclipse-temurin-17 \
+            mvn -B test
+        '''
+      }
+      post {
+        always {
+          junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
         }
       }
+    }
 
    stage('Package') {
        steps {

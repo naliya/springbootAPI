@@ -11,18 +11,34 @@ pipeline {
     }
 
     stage('Test') {
-      steps { sh 'mvn -B test' }
-      post {
-        always { junit 'target/surefire-reports/*.xml' }
+        steps {
+          sh '''
+            docker run --rm \
+              -v "$PWD":/workspace \
+              -w /workspace \
+              maven:3.9.6-eclipse-temurin-17 \
+              mvn -B test
+          '''
+        }
+        post {
+          always {
+            junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+          }
+        }
       }
-    }
 
-    stage('Package') {
-      steps {
-        sh 'mvn -B -DskipTests package'
-        archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-      }
-    }
+   stage('Package') {
+       steps {
+         sh '''
+           docker run --rm \
+             -v "$PWD":/workspace \
+             -w /workspace \
+             maven:3.9.6-eclipse-temurin-17 \
+             mvn -B -DskipTests package
+         '''
+         archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+       }
+     }
 
     stage('Build Docker Image') {
       steps {

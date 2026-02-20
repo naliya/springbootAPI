@@ -6,9 +6,15 @@ pipeline {
   }
 
   stages {
-    stage('Checkout') {
-      steps { checkout scm }
-    }
+      stage('Debug Workspace') {
+        steps {
+          sh '''
+            pwd
+            ls -la
+            find . -maxdepth 3 -name pom.xml -print
+          '''
+        }
+      }
 
     stage('Test') {
         steps {

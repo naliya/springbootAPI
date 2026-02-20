@@ -1,0 +1,13 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      group:
+        readiness:
+          include: db
+      probes:
+        enabled: true
+      show-details: never

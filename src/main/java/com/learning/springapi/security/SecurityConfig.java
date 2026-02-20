@@ -38,12 +38,11 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
-                                "/auth/**"
+                                "/auth/**",
+                                "/actuator/health/**",
+                                "/actuator/info"
                         ).permitAll()
                         .anyRequest().authenticated()
-//                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-//                        .requestMatchers("/auth/**").permitAll()
-//                        .anyRequest().authenticated()
                 );
 
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

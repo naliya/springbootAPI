@@ -18,6 +18,7 @@ pipeline {
 
     stage('Test') {
       steps {
+        sh 'echo WORKSPACE=$WORKSPACE'
         sh '''
           docker run --rm \
             -v "$WORKSPACE":/workspace \

@@ -67,7 +67,7 @@ pipeline {
           docker rm -f springapi-ci || true
           docker run -d --name springapi-ci -p 18080:8080 springapi:ci
           for i in $(seq 1 30); do
-            curl -fsS http://localhost:18080/actuator/health && exit 0
+            curl -fsS http://localhost:8080/actuator/health && exit 0
             sleep 2
           done
           echo "Health check failed"

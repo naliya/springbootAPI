@@ -18,40 +18,42 @@ pipeline {
 
       stage('Test') {
         steps {
-          echo 'No tests yet — skipping'
+          sh 'chmod +x mvnw'
+          sh './mvnw -B test'
+        }
+        post {
+          always {
+            junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+          }
         }
       }
 
-//     stage('Test') {
-//       steps {
-//         sh 'echo WORKSPACE=$WORKSPACE'
-//         sh '''
-//           docker run --rm \
-//             -v "$WORKSPACE":/workspace \
-//             -w /workspace \
-//             maven:3.9.6-eclipse-temurin-17 \
-//             mvn -B test
-//         '''
-//       }
-//       post {
-//         always {
-//           junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+      stage('Package') {
+        steps {
+          sh 'chmod +x mvnw'
+          sh './mvnw -B -DskipTests package'
+          archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+        }
+      }
+
+//       stage('Test') {
+//         steps {
+//           echo 'No tests yet — skipping'
 //         }
 //       }
-//     }
-
-   stage('Package') {
-       steps {
-         sh '''
-           docker run --rm \
-             -v "$PWD":/workspace \
-             -w /workspace \
-             maven:3.9.6-eclipse-temurin-17 \
-             mvn -B -DskipTests package
-         '''
-         archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-       }
-     }
+//
+//    stage('Package') {
+//        steps {
+//          sh '''
+//            docker run --rm \
+//              -v "$PWD":/workspace \
+//              -w /workspace \
+//              maven:3.9.6-eclipse-temurin-17 \
+//              mvn -B -DskipTests package
+//          '''
+//          archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+//        }
+//      }
 
     stage('Build Docker Image') {
       steps {

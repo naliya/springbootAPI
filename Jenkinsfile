@@ -62,19 +62,27 @@ pipeline {
     }
 
     stage('Smoke Test (Actuator)') {
-      steps {
-        sh '''
-          docker rm -f springapi-ci || true
-          docker run -d --name springapi-ci -p 18080:8080 springapi:ci
-          for i in $(seq 1 30); do
-            curl -fsS http://localhost:8080/actuator/health && exit 0
-            sleep 2
-          done
-          echo "Health check failed"
-          docker logs springapi-ci || true
-          exit 1
-        '''
-      }
+     steps {
+         sh '''
+           docker rm -f springapi-ci || true
+
+           # Run app container on the same Docker network as Jenkins (default compose network)
+           docker run -d --name springapi-ci --network springapi_default springapi:ci
+
+           # Wait and curl the container by name on port 8080
+           for i in $(seq 1 30); do
+             if docker exec jenkins curl -fsS http://springapi-ci:8080/actuator/health > /dev/null; then
+               echo "Smoke test passed"
+               exit 0
+             fi
+             sleep 2
+           done
+
+           echo "Health check failed"
+           docker logs springapi-ci || true
+           exit 1
+         '''
+       }
       post {
         always { sh 'docker rm -f springapi-ci || true' }
       }
